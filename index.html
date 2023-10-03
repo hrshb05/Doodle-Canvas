@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(47,167,205,1) 0%, rgba(0,212,255,1) 100%);
+      }
+        canvas {
+            border: 2px solid #000;
+            display: block;
+            margin: 0 auto;
+            background: white;
+        }
+    </style>
+    <title>Sketch Pad</title>
+</head>
+
+<body>
+    <h2>Drop your Doodle here</h2>
+    <canvas id="sketchCanvas"></canvas>
+    <div>
+        <label for="eraser">Eraser</label>
+        <input type="checkbox" id="eraser">
+
+    </div>
+    <script>
+    const canvas = document.getElementById('sketchCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let isErasing = false;
+
+
+    function setCanvasSize() {
+        // Set canvas size based on media query
+        if (window.matchMedia("(max-width: 600px)").matches) {
+            canvas.width = 300;
+            canvas.height = 200;
+        } else {
+            canvas.width = 600;
+            canvas.height = 300;
+        }
+
+        // Additional logic or drawing setup can go here
+        // localStorage.setItem('savedDrawing', canvas.toDataURL());
+    }
+
+    function startDrawing(e) {
+        isDrawing = true;
+        isErasing = document.getElementById('eraser').checked;
+        draw(e);
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.beginPath(); // Reset path to prevent connecting lines
+
+        // Save drawing to local storage
+        localStorage.setItem('savedDrawing', canvas.toDataURL());
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+
+        ctx.lineCap = 'round';
+
+        if (isErasing) {
+            ctx.strokeStyle = '#fff'; // Set color to white for eraser
+            ctx.lineWidth = 100; // Adjust eraser size
+            document.querySelector('body').style.cursor = "grab";
+        } else {
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2; // Set the regular drawing size
+            document.querySelector('body').style.cursor = "auto";
+
+        }
+
+        ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+    }
+
+
+    function loadSavedDrawing() {
+        const savedDrawing = localStorage.getItem('savedDrawing');
+        if (savedDrawing) {
+            const img = new Image();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = savedDrawing;
+        }
+    }
+
+    // Call the function initially and listen for window resize
+    loadSavedDrawing();
+    setCanvasSize();
+
+    window.addEventListener('resize', setCanvasSize);
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    </script>
+</body>
+
+</html>
