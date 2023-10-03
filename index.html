@@ -38,7 +38,6 @@
 
 
     function setCanvasSize() {
-        // Set canvas size based on media query
         if (window.matchMedia("(max-width: 600px)").matches) {
             canvas.width = 300;
             canvas.height = 200;
@@ -47,8 +46,6 @@
             canvas.height = 300;
         }
 
-        // Additional logic or drawing setup can go here
-        // localStorage.setItem('savedDrawing', canvas.toDataURL());
     }
 
     function startDrawing(e) {
@@ -59,9 +56,8 @@
 
     function stopDrawing() {
         isDrawing = false;
-        ctx.beginPath(); // Reset path to prevent connecting lines
+        ctx.beginPath(); 
 
-        // Save drawing to local storage
         localStorage.setItem('savedDrawing', canvas.toDataURL());
     }
 
@@ -71,21 +67,24 @@
         ctx.lineCap = 'round';
 
         if (isErasing) {
-            ctx.strokeStyle = '#fff'; // Set color to white for eraser
-            ctx.lineWidth = 100; // Adjust eraser size
+            ctx.strokeStyle = '#fff'; 
+            ctx.lineWidth = 100; 
             document.querySelector('body').style.cursor = "grab";
         } else {
             ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2; // Set the regular drawing size
+            ctx.lineWidth = 2; 
             document.querySelector('body').style.cursor = "auto";
 
         }
+            const x = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
+            const y = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
 
-        ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
-    }
+            ctx.lineTo(x - canvas.offsetLeft, y - canvas.offsetTop);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x - canvas.offsetLeft, y - canvas.offsetTop);
+        }
+
 
 
     function loadSavedDrawing() {
@@ -99,16 +98,22 @@
         }
     }
 
-    // Call the function initially and listen for window resize
     loadSavedDrawing();
     setCanvasSize();
 
     window.addEventListener('resize', setCanvasSize);
 
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseout', stopDrawing);
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('mousemove', draw);
+
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchcancel', stopDrawing);
+        canvas.addEventListener('touchmove', draw);
+
     </script>
 </body>
 
